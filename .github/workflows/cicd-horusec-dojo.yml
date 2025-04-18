@@ -49,7 +49,7 @@ jobs:
         -F "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
         -F "scan_type=Horusec"
 
-    # Notify Slack on failure
+    # Notify Slack on failur
     - name: Notify Slack if critical vulnerabilities found
       if: failure()
       uses: rtCamp/action-slack-notify@v2
