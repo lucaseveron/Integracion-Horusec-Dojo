@@ -21,16 +21,7 @@ jobs:
         path: ~/.cache/horusec
         key: horusec-${{ runner.os }}
 
-    - name: Ensure Docker is installed
-      run: |
-        sudo apt-get remove --purge containerd
-        sudo apt-get update
-        sudo apt-get install containerd.io
-        sudo apt-get install -y docker.io
-        sudo systemctl start docker
-        sudo usermod -aG docker $USER
-
-    - name: Run Horusec with Docker
+    - name: Run Horusec 
       run: |
         curl -fsSL https://horusec.io/bin/install.sh | bash
         horusec start -p ./ -o=json -O=horusec-report.json --log-level=info
