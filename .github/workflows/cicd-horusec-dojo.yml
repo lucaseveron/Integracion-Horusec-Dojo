@@ -21,10 +21,18 @@ jobs:
         path: ~/.cache/horusec
         key: horusec-${{ runner.os }}-${{ hashFiles('Dockerfile', '.horusecconfig') }}
 
-    # Run Linting (Optional)
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # O la versión que prefieras
+
+    - name: Install dependencies
+      run: npm install  # O `yarn install` si usas Yarn
+
     - name: Run Linting
-      run: |
-        eslint . --fix
+      run: npx eslint . --fix
+
+  
 
     # Install and run Horusec
     - name: Run Horusec
