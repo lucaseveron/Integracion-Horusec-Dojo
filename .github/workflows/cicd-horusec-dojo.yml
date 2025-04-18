@@ -11,7 +11,7 @@ jobs:
     name: Horusec Scan
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run Horusec
         env:
           AUTHOR: rahul.soni@knoldus.com
@@ -19,4 +19,4 @@ jobs:
         id: run_horusec
         uses: fike/horusec-action@v0.2.2
         with:
-          arguments: -p ./ --config-file-path=horusec-config.json -O report.txt --return-error=true
+          arguments: -p ./ --config-file-path=horusec-config.json -O report.json --return-error=true
