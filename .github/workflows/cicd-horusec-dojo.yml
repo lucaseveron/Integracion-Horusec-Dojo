@@ -6,9 +6,9 @@ on:
   pull_request:
 
 jobs:
-  scan-and-upload:
+  scan:
     runs-on: ubuntu-latest
-    name: Scan with Horusec 
+    name: Scan with Horusec
 
     steps:
     - name: Checkout code
@@ -19,12 +19,21 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/horusec
-        key: horusec-${{ runner.os }}-${{ hashFiles('Dockerfile', '.horusecconfig') }}
+        key: horusec-${{ runner.os }}-${{ hashFiles('Dockerfile', '.horusecconfig', '**/*.go', '**/*.js', '**/*.py') }}
 
-    # Install and run Horusec
-    - name: Run Horusec
+    # Install dependencies (ensure jq is installed)
+    - name: Install dependencies
+      run: |
+        sudo apt-get update && sudo apt-get install -y jq
+
+    # Install Horusec
+    - name: Install Horusec
       run: |
         curl -fsSL https://horusec.io/bin/install.sh | bash
+
+    # Run Horusec scan
+    - name: Run Horusec
+      run: |
         horusec start -p ./ -o=json -O=horusec-report.json --log-level=info
 
     # Check for critical vulnerabilities
@@ -35,16 +44,7 @@ jobs:
           echo "Critical vulnerabilities found!" && exit 1
         fi
 
-    # Upload report to DefectDojo
-    - name: Upload report to DefectDojo
+    # Output the report location (for reference)
+    - name: Output report location
       run: |
-        curl -X POST "http://localhost:8080/api/v2/import-scan/" \
-        -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_TOKEN }}" \
-        -F "file=@horusec-report.json" \
-        -F "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
-        -F "scan_type=Horusec"
-
-    
-
-
-
+        echo "Horusec report saved at: $(pwd)/horusec-report.json"
