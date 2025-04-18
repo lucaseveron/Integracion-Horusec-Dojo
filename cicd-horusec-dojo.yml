@@ -1,0 +1,45 @@
+name: Horusec + DefectDojo CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  scan-and-upload:
+    runs-on: ubuntu-latest
+    name: Scan with Horusec and send to DefectDojo
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Cache de dependencias de Horusec
+    - name: Cache Horusec image
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/horusec
+        key: horusec-${{ runner.os }}
+
+    - name: Ensure Docker is installed
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+        sudo systemctl start docker
+        sudo usermod -aG docker $USER
+
+    - name: Run Horusec with Docker
+      run: |
+        curl -fsSL https://horusec.io/bin/install.sh | bash
+        horusec start -p ./ -o=json -O=horusec-report.json --log-level=info
+
+    - name: Upload to DefectDojo
+      run: |
+        curl -X POST "${{ secrets.DEFECTDOJO_URL }}/api/v2/import-scan/" \
+          -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_TOKEN }}" \
+          -F "file=@horusec-report.json" \
+          -F "scan_type=Horusec Scan" \
+          -F "engagement=${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}" \
+          -F "minimum_severity=Low" \
+          -F "active=true" \
+          -F "verified=true"

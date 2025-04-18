@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/devcode-457115/laravel_app:staging-$SHORT_SHA', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/devcode-457115/laravel_app:staging-$SHORT_SHA']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: [
+      'run', 'deploy', 'laravel-service',
+      '--image', 'gcr.io/devcode-457115/laravel_app:staging-$SHORT_SHA',
+      '--region', 'us-east4', # ajustá tu región
+      '--platform', 'managed',
+      '--allow-unauthenticated'
+    ]
+
+images:
+  - gcr.io/devcode-457115/laravel_app:staging-$SHORT_SHA
