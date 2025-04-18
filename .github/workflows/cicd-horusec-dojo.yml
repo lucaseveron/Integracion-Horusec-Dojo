@@ -19,4 +19,11 @@ jobs:
         id: run_horusec
         uses: fike/horusec-action@v0.2.2
         with:
-          arguments: -p ./ --config-file-path=horusec-config.json -O report.json --return-error=true
+          arguments: -p ./ --config-file-path=horusec-config.json -O horusec-report.json --return-error=true
+
+      - name: Upload Horusec report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: horusec-report
+          path: horusec-report.json
+
