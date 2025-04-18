@@ -9,21 +9,28 @@ jobs:
   checking_code:
     runs-on: ubuntu-latest
     name: Horusec Scan
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Run Horusec
-        env:
-          AUTHOR: rahul.soni@knoldus.com
-          HORUSEC_CLI_RETURN_ERROR_IF_FOUND_VULNERABILITY: "true"
-        id: run_horusec
-        uses: fike/horusec-action@v0.2.2
-        with:
-          arguments: -p ./ --config-file-path=horusec-config.json -O horusec-report.json --return-error=true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Horusec
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/scripts/install.sh | bash
+          horusec version
+
+      - name: Run Horusec scan
+        run: |
+          horusec start -p ./ \
+            -o=json \
+            -O=horusec-report.json \
+            --log-level=info \
+            --config-file-path=horusec-config.json
 
       - name: Upload Horusec report as artifact
-        uses: fike/horusec-action@v0.2.2
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: horusec-report
           path: horusec-report.json
+
 
