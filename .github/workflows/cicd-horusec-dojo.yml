@@ -28,7 +28,7 @@ jobs:
             --config-file-path=horusec-config.json
 
       - name: Upload Horusec report as artifact
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@master
         with:
           name: horusec-report
           path: horusec-report.json
