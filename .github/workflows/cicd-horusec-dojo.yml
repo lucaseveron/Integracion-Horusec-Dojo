@@ -16,7 +16,9 @@ jobs:
 
       - name: Install Horusec
         run: |
-          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/scripts/install.sh | bash
+          curl -L https://github.com/ZupIT/horusec/releases/latest/download/horusec_linux_amd64 -o horusec
+          chmod +x horusec
+          sudo mv horusec /usr/local/bin/
           horusec version
 
       - name: Run Horusec scan
@@ -24,13 +26,13 @@ jobs:
           horusec start -p ./ \
             -o=json \
             -O=horusec-report.json \
-            --log-level=info \
-            --config-file-path=horusec-config.json
+            --log-level=info
 
       - name: Upload Horusec report as artifact
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v3
         with:
           name: horusec-report
           path: horusec-report.json
+
 
 
