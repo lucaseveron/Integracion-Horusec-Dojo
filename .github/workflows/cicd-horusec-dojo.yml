@@ -6,46 +6,17 @@ on:
   pull_request:
 
 jobs:
-  scan:
+  checking_code:
     runs-on: ubuntu-latest
-    name: Scan with Horusec
-
+    name: Horusec Scan
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    # Cache Horusec dependencies
-    - name: Cache Horusec image
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/horusec
-        key: horusec-${{ runner.os }}-${{ hashFiles('Dockerfile', '.horusecconfig', '**/*.go', '**/*.js', '**/*.py') }}
-
-    # Install dependencies (ensure jq is installed)
-    - name: Install dependencies
-      run: |
-        sudo apt-get update && sudo apt-get install -y jq
-
-    # Install Horusec
-    - name: Install Horusec
-      run: |
-        curl -fsSL -L https://horusec.io/bin/install.sh | bash
-
-    # Run Horusec scan
-    - name: Run Horusec
-      run: |
-        horusec start -p ./ -o=json -O=horusec-report.json --log-level=info
-
-    # Check for critical vulnerabilities
-    - name: Check Horusec report for critical vulnerabilities
-      run: |
-        vulnerabilities=$(jq '.vulnerabilities | map(select(.severity == "High" or .severity == "Critical")) | length' horusec-report.json)
-        if [ "$vulnerabilities" -gt 0 ]; then
-          echo "Critical vulnerabilities found!" && exit 1
-        fi
-
-    # Output the report location (for reference)
-    - name: Output report location
-      run: |
-        echo "Horusec report saved at: $(pwd)/horusec-report.json"
-
+      - uses: actions/checkout@v3
+      
+      - name: Run Horusec
+        env:
+          AUTHOR: rahul.soni@knoldus.com
+          HORUSEC_CLI_RETURN_ERROR_IF_FOUND_VULNERABILITY: "true"
+        id: run_horusec
+        uses: fike/horusec-action@v0.2.2
+        with:
+          arguments: -p ./ --config-file-path=horusec-config.json -O report.txt --return-error=true
