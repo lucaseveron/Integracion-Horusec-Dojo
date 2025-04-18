@@ -29,7 +29,7 @@ jobs:
     # Install Horusec
     - name: Install Horusec
       run: |
-        curl -fsSL https://horusec.io/bin/install.sh | bash
+        curl -fsSL -L https://horusec.io/bin/install.sh | bash
 
     # Run Horusec scan
     - name: Run Horusec
@@ -48,3 +48,4 @@ jobs:
     - name: Output report location
       run: |
         echo "Horusec report saved at: $(pwd)/horusec-report.json"
+
