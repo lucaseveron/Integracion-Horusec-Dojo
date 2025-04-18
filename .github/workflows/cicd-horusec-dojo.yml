@@ -1,4 +1,4 @@
-name: Horusec 
+name: Horusec
 
 on:
   push:
@@ -14,16 +14,47 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Cache de dependencias de Horusec
+    # Cache Horusec dependencies
     - name: Cache Horusec image
       uses: actions/cache@v3
       with:
         path: ~/.cache/horusec
-        key: horusec-${{ runner.os }}
+        key: horusec-${{ runner.os }}-${{ hashFiles('Dockerfile', '.horusecconfig') }}
 
-    - name: Run Horusec 
+    # Run Linting (Optional)
+    - name: Run Linting
+      run: |
+        eslint . --fix
+
+    # Install and run Horusec
+    - name: Run Horusec
       run: |
         curl -fsSL https://horusec.io/bin/install.sh | bash
         horusec start -p ./ -o=json -O=horusec-report.json --log-level=info
+
+    # Check for critical vulnerabilities
+    - name: Check Horusec report for critical vulnerabilities
+      run: |
+        vulnerabilities=$(jq '.vulnerabilities | map(select(.severity == "High" or .severity == "Critical")) | length' horusec-report.json)
+        if [ "$vulnerabilities" -gt 0 ]; then
+          echo "Critical vulnerabilities found!" && exit 1
+        fi
+
+    # Upload report to DefectDojo
+    - name: Upload report to DefectDojo
+      run: |
+        curl -X POST "http://localhost:8080/api/v2/import-scan/" \
+        -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_TOKEN }}" \
+        -F "file=@horusec-report.json" \
+        -F "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
+        -F "scan_type=Horusec"
+
+    # Notify Slack on failure
+    - name: Notify Slack if critical vulnerabilities found
+      if: failure()
+      uses: rtCamp/action-slack-notify@v2
+      with:
+        slack_webhook_url: ${{
+
 
 
