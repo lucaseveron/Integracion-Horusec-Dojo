@@ -49,14 +49,7 @@ jobs:
         -F "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
         -F "scan_type=Horusec"
 
-    # Notify Slack on failure
-    - name: Notify Slack if critical vulnerabilities found
-      if: failure()
-      uses: rtCamp/action-slack-notify@v2
-      with:
-        slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        message: "🚨 Critical vulnerabilities found in Horusec scan! 🚨"
-
+    
 
 
 
