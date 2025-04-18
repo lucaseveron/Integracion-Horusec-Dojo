@@ -22,7 +22,7 @@ jobs:
           arguments: -p ./ --config-file-path=horusec-config.json -O horusec-report.json --return-error=true
 
       - name: Upload Horusec report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: horusec-report
           path: horusec-report.json
